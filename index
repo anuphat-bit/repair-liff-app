@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <?!= include('Stylesheet'); ?>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>ใบแจ้งซ่อมออนไลน์</h2>
+        <p>กรุณากรอกข้อมูลให้ครบถ้วนเพื่อความรวดเร็วในการดำเนินการ</p>
+        <div id="loading" class="loading-overlay"><div class="spinner"></div><p>กำลังโหลดข้อมูลผู้ใช้...</p></div>
+        <div id="error-message" class="error" style="display:none;"></div>
+        <form id="repair-form" style="display:none;">
+            <input type="hidden" id="lineUserId" name="lineUserId">
+            <label for="requesterName">ชื่อ-สกุลผู้แจ้ง</label>
+            <input type="text" id="requesterName" name="requesterName" required>
+            <label for="department">แผนก/ฝ่าย</label>
+            <input type="text" id="department" name="department" required>
+            <label for="phoneNumber">เบอร์โทรศัพท์ติดต่อ</label>
+            <input type="tel" id="phoneNumber" name="phoneNumber" required>
+            <label for="location">ตำแหน่งที่ต้องการให้ซ่อม (ระบุชัดเจน)</label>
+            <textarea id="location" name="location" rows="3" required></textarea>
+            <label for="problemType">ประเภทของปัญหา</label>
+            <select id="problemType" name="problemType" required>
+                <option value="">-- โปรดเลือก --</option>
+                <option value="ระบบไฟฟ้า">ระบบไฟฟ้า</option>
+                <option value="ระบบประปา">ระบบประปา</option>
+                <option value="โทรศัพท์/อินเทอร์เน็ต">โทรศัพท์/อินเทอร์เน็ต</option>
+                <option value="เครื่องปรับอากาศ">เครื่องปรับอากาศ</option>
+                <option value="ซ่อมแซมทั่วไป">ซ่อมแซมทั่วไป</option>
+            </select>
+            <label for="description">ลักษณะ/อาการที่ชำรุด</label>
+            <textarea id="description" name="description" rows="5" required></textarea>
+            <label for="urgency">ระดับความเร่งด่วน</label>
+            <select id="urgency" name="urgency" required>
+                <option value="ทั่วไป">ทั่วไป</option>
+                <option value="ด่วน">ด่วน</option>
+                <option value="ด่วนที่สุด">ด่วนที่สุด</option>
+            </select>
+            <label for="problemImage">แนบรูปภาพปัญหา (ถ้ามี)</label>
+            <input type="file" id="problemImage" name="problemImage" accept="image/*">
+            <button type="submit" id="submit-button">ส่งเรื่อง</button>
+        </form>
+    </div>
+    <div id="success-modal" class="modal-overlay">
+        <div class="modal-content">
+            <img src="https://i.imgur.com/4z2Z8tG.png" alt="Success" class="success-icon">
+            <h3>รับเรื่องเรียบร้อยแล้ว!</h3>
+            <p>รหัสใบแจ้งซ่อมของคุณคือ:</p>
+            <p class="ticket-id-display"></p>
+            <p class="small-text">เราได้ส่งรายละเอียดไปที่ LINE ของคุณแล้ว<br>เจ้าหน้าที่จะรีบดำเนินการแก้ไขให้โดยเร็วที่สุด</p>
+        </div>
+    </div>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // !-- กรุณาใส่ LIFF ID ของคุณเอง --!
+        liff.init({ liffId: "2008248434-1K7b3QPa" })
+        .then(() => {
+            if (!liff.isLoggedIn()) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error-message').innerText = 'กรุณาเปิดหน้านี้ผ่านแอปพลิเคชัน LINE';
+                document.getElementById('error-message').style.display = 'block';
+            } else { return liff.getProfile(); }
+        })
+        .then(profile => {
+            document.getElementById('lineUserId').value = profile.userId;
+            document.getElementById('requesterName').value = profile.displayName;
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('repair-form').style.display = 'block';
+        })
+        .catch((err) => {
+            console.error(err);
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error-message').innerText = 'เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + err.message;
+            document.getElementById('error-message').style.display = 'block';
+        });
+        document.getElementById('repair-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const submitButton = document.getElementById('submit-button');
+            submitButton.disabled = true;
+            submitButton.innerText = 'กำลังส่ง...';
+            const file = document.getElementById('problemImage').files[0];
+            const formObject = Object.fromEntries(new FormData(this).entries());
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    formObject.fileData = {
+                        fileName: file.name, mimeType: file.type,
+                        base64: e.target.result.split(',')[1]
+                    };
+                    google.script.run.withSuccessHandler(showSuccess).withFailureHandler(showError).submitForm(formObject);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                google.script.run.withSuccessHandler(showSuccess).withFailureHandler(showError).submitForm(formObject);
+            }
+        });
+    });
+    function showSuccess(response) {
+        if (response.status === "success") {
+            document.getElementById('repair-form').style.display = 'none';
+            const modal = document.getElementById('success-modal');
+            document.querySelectorAll('.ticket-id-display').forEach(el => { el.innerText = response.ticketId; });
+            modal.style.display = 'flex';
+            setTimeout(() => { liff.closeWindow(); }, 6000);
+        } else { showError({ message: response.message }); }
+    }
+    function showError(error) {
+        alert('เกิดข้อผิดพลาด: ' + error.message);
+        const submitButton = document.getElementById('submit-button');
+        submitButton.disabled = false;
+        submitButton.innerText = 'ส่งเรื่อง';
+    }
+    </script>
+</body>
+</html>
