@@ -103,49 +103,5 @@
                         };
                         sendDataToBackend(formObject);
                         };
-reader.readAsDataURL(file);
-} else {
-sendDataToBackend(formObject);
-}
-});
-});
 
-        // --- HELPER FUNCTIONS ---
-        function sendDataToBackend(data) {
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors', // เพิ่มบรรทัดนี้เพื่อทดสอบ
-                cache: 'no-cache',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({action: 'submitForm', data: data})
-            })
-            .then(response => {
-                // เนื่องจากใช้ no-cors เราจะไม่สามารถอ่าน response ได้ แต่ request จะถูกส่งไป
-                // เราจะแสดงหน้าต่างสำเร็จไปก่อน แล้วไปตรวจสอบที่ Google Sheet
-                showSuccess({ status: "success", ticketId: "N/A - โปรดตรวจสอบที่ชีท" });
-            })
-            .catch(error => showError(error));
-        }
-
-        function showSuccess(response) {
-            if (response.status === "success") {
-                document.getElementById('repair-form').style.display = 'none';
-                const modal = document.getElementById('success-modal');
-                document.querySelectorAll('.ticket-id-display').forEach(el => { el.innerText = response.ticketId; });
-                modal.style.display = 'flex';
-                setTimeout(() => { liff.closeWindow(); }, 6000);
-            } else {
-                showError({ message: response.message });
-            }
-        }
-
-        function showError(error) {
-            alert('เกิดข้อผิดพลาด: ' + error.message);
-            const submitButton = document.getElementById('submit-button');
-            submitButton.disabled = false;
-            submitButton.innerText = 'ส่งเรื่อง';
-        }
-    </script>
-</body>
-</html>
 ```
