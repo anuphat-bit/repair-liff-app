@@ -1,96 +1,49 @@
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    // --- ใช้ LIFF ID ที่ถูกต้องของคุณ ---
-    liff.init({ liffId: "2008248434-1k7bSQPa" })
-        .then(() => {
-            // ตรวจสอบว่าล็อกอินหรือยัง
-            if (!liff.isLoggedIn()) {
-                // ถ้ายังไม่ล็อกอิน ให้โยน Error ไปที่ .catch เพื่อหยุดการทำงานทันที
-                throw new Error("ไม่ได้ล็อกอินใน LIFF กรุณาเปิดจากแอป LINE");
-            }
-            // ถ้าล็อกอินแล้ว ให้ไปขอข้อมูลโปรไฟล์ต่อ
-            return liff.getProfile();
-        })
-        .then(profile => {
-            // ฟังก์ชันนี้จะทำงานก็ต่อเมื่อ getProfile สำเร็จเท่านั้น
-            document.getElementById('lineUserId').value = profile.userId;
-            document.getElementById('requesterName').value = profile.displayName;
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('repair-form').style.display = 'block';
-        })
-        .catch((err) => {
-            // ดักจับ Error ทั้งหมดที่เกิดขึ้นใน .then ด้านบน
-            console.error(err);
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('error-message').innerText = 'เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + err.message;
-            document.getElementById('error-message').style.display = 'block';
-        });
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    // --- ใช้ LIFF ID ที่ถูกต้องของคุณ ---
-    liff.init({ liffId: "2008248434-1k7bSQPa" })
-        .then(() => {
-            // ตรวจสอบว่าล็อกอินหรือยัง
-            if (!liff.isLoggedIn()) {
-                // ถ้ายังไม่ล็อกอิน ให้โยน Error ไปที่ .catch เพื่อหยุดการทำงานทันที
-                throw new Error("ไม่ได้ล็อกอินใน LIFF กรุณาเปิดจากแอป LINE");
-            }
-            // ถ้าล็อกอินแล้ว ให้ไปขอข้อมูลโปรไฟล์ต่อ
-            return liff.getProfile();
-        })
-        .then(profile => {
-            // ฟังก์ชันนี้จะทำงานก็ต่อเมื่อ getProfile สำเร็จเท่านั้น
-            document.getElementById('lineUserId').value = profile.userId;
-            document.getElementById('requesterName').value = profile.displayName;
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('repair-form').style.display = 'block';
-        })
-        .catch((err) => {
-            // ดักจับ Error ทั้งหมดที่เกิดขึ้นใน .then ด้านบน
-            console.error(err);
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('error-message').innerText = 'เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + err.message;
-            document.getElementById('error-message').style.display = 'block';
-        });
+<!DOCTYPE html>
+<html>
+<head>
+  <title>LIFF Debug</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+  <h1>หน้าทดสอบระบบ LIFF</h1>
+  <p>สถานะปัจจุบัน: <strong id="status">กำลังเริ่มต้น...</strong></p>
 
-    // --- โค้ดส่วน Form Submission (เหมือนเดิม) ---
-    const form = document.getElementById('repair-form');
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const submitButton = document.getElementById('submit-button');
-        submitButton.disabled = true;
-        submitButton.innerText = 'กำลังส่ง...';
-        const file = document.getElementById('problemImage').files[0];
-        const formObject = Object.fromEntries(new FormData(this).entries());
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                formObject.fileData = {
-                    fileName: file.name, mimeType: file.type,
-                    base64: e.target.result.split(',')[1]
-                };
-                google.script.run.withSuccessHandler(showSuccess).withFailureHandler(showError).submitForm(formObject);
-            };
-            reader.readAsDataURL(file);
-        } else {
-            google.script.run.withSuccessHandler(showSuccess).withFailureHandler(showError).submitForm(formObject);
-        }
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const statusEl = document.getElementById('status');
+      statusEl.textContent = 'หน้าเว็บพร้อมแล้ว, กำลังเรียก liff.init()...';
+
+      // 2. เริ่มต้น LIFF ด้วย ID ของคุณ
+      liff.init({ liffId: "2008248434-1k7bSQPa" })
+        .then(() => {
+          statusEl.textContent = 'liff.init() สำเร็จ!';
+          alert('SUCCESS: liff.init() ทำงานสำเร็จ!');
+
+          // 3. ตรวจสอบสถานะล็อกอิน
+          if (liff.isLoggedIn()) {
+            statusEl.textContent = 'สถานะ: ล็อกอินแล้ว, กำลังดึงโปรไฟล์...';
+            return liff.getProfile();
+          } else {
+            statusEl.textContent = 'สถานะ: ยังไม่ได้ล็อกอิน';
+            alert('ERROR: LIFF บอกว่ายังไม่ได้ล็อกอิน');
+          }
+        })
+        .then(profile => {
+          // 4. ถ้าดึงโปรไฟล์สำเร็จ
+          if (profile) {
+            statusEl.textContent = 'ดึงโปรไฟล์สำเร็จ! User ID: ' + profile.userId;
+            alert('SUCCESS: ได้โปรไฟล์แล้ว! ชื่อ: ' + profile.displayName);
+          }
+        })
+        .catch(err => {
+          // 5. หากมีข้อผิดพลาดเกิดขึ้น
+          console.error(err);
+          statusEl.textContent = 'เกิดข้อผิดพลาด: ' + JSON.stringify(err);
+          alert('CATCH ERROR: ' + JSON.stringify(err));
+        });
     });
-});
-
-function showSuccess(response) {
-    if (response.status === "success") {
-        document.getElementById('repair-form').style.display = 'none';
-        const modal = document.getElementById('success-modal');
-        document.querySelectorAll('.ticket-id-display').forEach(el => { el.innerText = response.ticketId; });
-        modal.style.display = 'flex';
-        setTimeout(() => { liff.closeWindow(); }, 6000);
-    } else { showError({ message: response.message }); }
-}
-function showError(error) {
-    alert('เกิดข้อผิดพลาด: ' + error.message);
-    const submitButton = document.getElementById('submit-button');
-    submitButton.disabled = false;
-    submitButton.innerText = 'ส่งเรื่อง';
-}
-</script>
+  </script>
+</body>
+</html>
