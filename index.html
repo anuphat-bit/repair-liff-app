@@ -1,49 +1,145 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>LIFF Debug</title>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <title>ระบบแจ้งซ่อมออนไลน์</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background-color:#f4f4f9;color:#333;margin:0;padding:15px;display:flex;justify-content:center}.container{max-width:600px;width:100%;background:#fff;padding:25px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.1)}h2{text-align:center;color:#444;margin-bottom:10px}p{text-align:center;color:#666;margin-bottom:20px}label{display:block;margin-bottom:8px;font-weight:600}input[type=text],input[type=tel],input[type=file],textarea,select{width:100%;padding:10px;margin-bottom:15px;border:1px solid #ddd;border-radius:4px;box-sizing:border-box;font-size:16px}input[type=file]{padding:5px}textarea{resize:vertical}button{width:100%;padding:12px;background-color:#00b900;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:18px;font-weight:700;transition:background-color .2s}button:disabled{background-color:#ccc;cursor:not-allowed}.error{text-align:center;padding:20px;border-radius:5px;margin-top:20px;background-color:#ffebee;color:#c62828}.loading-overlay{text-align:center}.spinner{border:4px solid #f3f3f3;border-top:4px solid #3498db;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:20px auto}@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);display:none;justify-content:center;align-items:center;z-index:1000}.modal-content{background:#fff;padding:30px;border-radius:12px;text-align:center;box-shadow:0 5px 15px rgba(0,0,0,.2);width:90%;max-width:350px;animation:slide-down .3s ease-out}.success-icon{width:80px;height:80px;margin-bottom:15px}.modal-content h3{margin:0 0 10px;color:#2e7d32;font-size:24px}.modal-content p{margin:5px 0;color:#333}.ticket-id-display{font-size:22px;font-weight:700;color:#007bff;background-color:#f0f8ff;padding:5px 10px;border-radius:5px;display:inline-block;margin-top:5px;margin-bottom:15px}.small-text{font-size:14px;color:#666}@keyframes slide-down{0%{transform:translateY(-50px);opacity:0}100%{transform:translateY(0);opacity:1}}
+    </style>
 </head>
 <body>
-  <h1>หน้าทดสอบระบบ LIFF</h1>
-  <p>สถานะปัจจุบัน: <strong id="status">กำลังเริ่มต้น...</strong></p>
+    <div class="container">
+        <h2>ใบแจ้งซ่อมออนไลน์</h2>
+        <p>กรุณากรอกข้อมูลให้ครบถ้วนเพื่อความรวดเร็วในการดำเนินการ</p>
+        <div id="loading"><div class="spinner"></div><p>กำลังโหลดข้อมูลผู้ใช้...</p></div>
+        <div id="error-message" class="error" style="display:none;"></div>
+        <form id="repair-form" style="display:none;">
+            <input type="hidden" id="lineUserId" name="lineUserId">
+            <label for="requesterName">ชื่อ-สกุลผู้แจ้ง</label>
+            <input type="text" id="requesterName" name="requesterName" required>
+            <label for="department">แผนก/ฝ่าย</label>
+            <input type="text" id="department" name="department" required>
+            <label for="phoneNumber">เบอร์โทรศัพท์ติดต่อ</label>
+            <input type="tel" id="phoneNumber" name="phoneNumber" required>
+            <label for="location">ตำแหน่งที่ต้องการให้ซ่อม (ระบุชัดเจน)</label>
+            <textarea id="location" name="location" rows="3" required></textarea>
+            <label for="problemType">ประเภทของปัญหา</label>
+            <select id="problemType" name="problemType" required>
+                <option value="">-- โปรดเลือก --</option>
+                <option value="ระบบไฟฟ้า">ระบบไฟฟ้า</option>
+                <option value="ระบบประปา">ระบบประปา</option>
+                <option value="โทรศัพท์/อินเทอร์เน็ต">โทรศัพท์/อินเทอร์เน็ต</option>
+                <option value="เครื่องปรับอากาศ">เครื่องปรับอากาศ</option>
+                <option value="ซ่อมแซมทั่วไป">ซ่อมแซมทั่วไป</option>
+            </select>
+            <label for="description">ลักษณะ/อาการที่ชำรุด</label>
+            <textarea id="description" name="description" rows="5" required></textarea>
+            <label for="urgency">ระดับความเร่งด่วน</label>
+            <select id="urgency" name="urgency" required>
+                <option value="ทั่วไป">ทั่วไป</option>
+                <option value="ด่วน">ด่วน</option>
+                <option value="ด่วนที่สุด">ด่วนที่สุด</option>
+            </select>
+            <label for="problemImage">แนบรูปภาพปัญหา (ถ้ามี)</label>
+            <input type="file" id="problemImage" name="problemImage" accept="image/*">
+            <button type="submit" id="submit-button">ส่งเรื่อง</button>
+        </form>
+    </div>
+    <div id="success-modal" class="modal-overlay">
+        <div class="modal-content">
+            <img src="https://i.imgur.com/4z2Z8tG.png" alt="Success" class="success-icon">
+            <h3>รับเรื่องเรียบร้อยแล้ว!</h3>
+            <p>รหัสใบแจ้งซ่อมของคุณคือ:</p>
+            <p class="ticket-id-display"></p>
+            <p class="small-text">เราได้ส่งรายละเอียดไปที่ LINE ของคุณแล้ว<br>เจ้าหน้าที่จะรีบดำเนินการแก้ไขให้โดยเร็วที่สุด</p>
+        </div>
+    </div>
+    <script>
+        // --- BACKEND URL CONFIGURATION ---
+        // !-- สำคัญมาก: นำ URL ของ Web App ที่ได้จากขั้นตอนที่ 1 มาวางที่นี่ --!
+        const SCRIPT_URL = "YOUR_NEW_WEB_APP_URL";
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const statusEl = document.getElementById('status');
-      statusEl.textContent = 'หน้าเว็บพร้อมแล้ว, กำลังเรียก liff.init()...';
+        // --- LIFF INITIALIZATION ---
+        document.addEventListener("DOMContentLoaded", function() {
+            liff.init({ liffId: "2008248434-1k7bSQPa" })
+                .then(() => {
+                    if (!liff.isLoggedIn()) {
+                        throw new Error("ไม่ได้ล็อกอินใน LIFF กรุณาเปิดจากแอป LINE");
+                    }
+                    return liff.getProfile();
+                })
+                .then(profile => {
+                    document.getElementById('lineUserId').value = profile.userId;
+                    document.getElementById('requesterName').value = profile.displayName;
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('repair-form').style.display = 'block';
+                })
+                .catch((err) => {
+                    console.error(err);
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('error-message').innerText = 'เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + err.message;
+                    document.getElementById('error-message').style.display = 'block';
+                });
 
-      // 2. เริ่มต้น LIFF ด้วย ID ของคุณ
-      liff.init({ liffId: "2008248434-1k7bSQPa" })
-        .then(() => {
-          statusEl.textContent = 'liff.init() สำเร็จ!';
-          alert('SUCCESS: liff.init() ทำงานสำเร็จ!');
+            // --- FORM SUBMISSION LOGIC ---
+            document.getElementById('repair-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const submitButton = document.getElementById('submit-button');
+                submitButton.disabled = true;
+                submitButton.innerText = 'กำลังส่ง...';
 
-          // 3. ตรวจสอบสถานะล็อกอิน
-          if (liff.isLoggedIn()) {
-            statusEl.textContent = 'สถานะ: ล็อกอินแล้ว, กำลังดึงโปรไฟล์...';
-            return liff.getProfile();
-          } else {
-            statusEl.textContent = 'สถานะ: ยังไม่ได้ล็อกอิน';
-            alert('ERROR: LIFF บอกว่ายังไม่ได้ล็อกอิน');
-          }
-        })
-        .then(profile => {
-          // 4. ถ้าดึงโปรไฟล์สำเร็จ
-          if (profile) {
-            statusEl.textContent = 'ดึงโปรไฟล์สำเร็จ! User ID: ' + profile.userId;
-            alert('SUCCESS: ได้โปรไฟล์แล้ว! ชื่อ: ' + profile.displayName);
-          }
-        })
-        .catch(err => {
-          // 5. หากมีข้อผิดพลาดเกิดขึ้น
-          console.error(err);
-          statusEl.textContent = 'เกิดข้อผิดพลาด: ' + JSON.stringify(err);
-          alert('CATCH ERROR: ' + JSON.stringify(err));
+                const formObject = Object.fromEntries(new FormData(this).entries());
+                const file = document.getElementById('problemImage').files[0];
+
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        formObject.fileData = {
+                            fileName: file.name, mimeType: file.type,
+                            base64: e.target.result.split(',')[1]
+                        };
+                        sendDataToBackend(formObject);
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    sendDataToBackend(formObject);
+                }
+            });
         });
-    });
-  </script>
+
+        // --- HELPER FUNCTIONS ---
+        function sendDataToBackend(data) {
+            // เปลี่ยนจากการใช้ google.script.run เป็น fetch API
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({action: 'submitForm', data: data}),
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(result => showSuccess(result))
+            .catch(error => showError(error));
+        }
+
+        function showSuccess(response) {
+            if (response.status === "success") {
+                document.getElementById('repair-form').style.display = 'none';
+                const modal = document.getElementById('success-modal');
+                document.querySelectorAll('.ticket-id-display').forEach(el => { el.innerText = response.ticketId; });
+                modal.style.display = 'flex';
+                setTimeout(() => { liff.closeWindow(); }, 6000);
+            } else {
+                showError({ message: response.message });
+            }
+        }
+
+        function showError(error) {
+            alert('เกิดข้อผิดพลาด: ' + error.message);
+            const submitButton = document.getElementById('submit-button');
+            submitButton.disabled = false;
+            submitButton.innerText = 'ส่งเรื่อง';
+        }
+    </script>
 </body>
 </html>
