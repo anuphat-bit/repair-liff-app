@@ -25,6 +25,33 @@ document.addEventListener("DOMContentLoaded", function() {
             document.getElementById('error-message').innerText = 'เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + err.message;
             document.getElementById('error-message').style.display = 'block';
         });
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // --- ใช้ LIFF ID ที่ถูกต้องของคุณ ---
+    liff.init({ liffId: "2008248434-1k7bSQPa" })
+        .then(() => {
+            // ตรวจสอบว่าล็อกอินหรือยัง
+            if (!liff.isLoggedIn()) {
+                // ถ้ายังไม่ล็อกอิน ให้โยน Error ไปที่ .catch เพื่อหยุดการทำงานทันที
+                throw new Error("ไม่ได้ล็อกอินใน LIFF กรุณาเปิดจากแอป LINE");
+            }
+            // ถ้าล็อกอินแล้ว ให้ไปขอข้อมูลโปรไฟล์ต่อ
+            return liff.getProfile();
+        })
+        .then(profile => {
+            // ฟังก์ชันนี้จะทำงานก็ต่อเมื่อ getProfile สำเร็จเท่านั้น
+            document.getElementById('lineUserId').value = profile.userId;
+            document.getElementById('requesterName').value = profile.displayName;
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('repair-form').style.display = 'block';
+        })
+        .catch((err) => {
+            // ดักจับ Error ทั้งหมดที่เกิดขึ้นใน .then ด้านบน
+            console.error(err);
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error-message').innerText = 'เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + err.message;
+            document.getElementById('error-message').style.display = 'block';
+        });
 
     // --- โค้ดส่วน Form Submission (เหมือนเดิม) ---
     const form = document.getElementById('repair-form');
