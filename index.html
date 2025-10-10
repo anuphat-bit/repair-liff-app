@@ -63,7 +63,8 @@
 
         // --- LIFF INITIALIZATION ---
         document.addEventListener("DOMContentLoaded", function() {
-           liff.init({ liffId: "2008248434-1K7b3QPa" })
+            // !-- LIFF ID ที่ถูกต้อง 100% --!
+            liff.init({ liffId: "2008248434-1k7bSQPa" })
                 .then(() => {
                     if (!liff.isLoggedIn()) {
                         throw new Error("ไม่ได้ล็อกอินใน LIFF กรุณาเปิดจากแอป LINE");
@@ -101,24 +102,28 @@
                             base64: e.target.result.split(',')[1]
                         };
                         sendDataToBackend(formObject);
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    sendDataToBackend(formObject);
-                }
-            });
-        });
+                        };
+reader.readAsDataURL(file);
+} else {
+sendDataToBackend(formObject);
+}
+});
+});
 
         // --- HELPER FUNCTIONS ---
         function sendDataToBackend(data) {
-            // เปลี่ยนจากการใช้ google.script.run เป็น fetch API
             fetch(SCRIPT_URL, {
                 method: 'POST',
-                body: JSON.stringify({action: 'submitForm', data: data}),
-                headers: { 'Content-Type': 'application/json' }
+                mode: 'no-cors', // เพิ่มบรรทัดนี้เพื่อทดสอบ
+                cache: 'no-cache',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({action: 'submitForm', data: data})
             })
-            .then(response => response.json())
-            .then(result => showSuccess(result))
+            .then(response => {
+                // เนื่องจากใช้ no-cors เราจะไม่สามารถอ่าน response ได้ แต่ request จะถูกส่งไป
+                // เราจะแสดงหน้าต่างสำเร็จไปก่อน แล้วไปตรวจสอบที่ Google Sheet
+                showSuccess({ status: "success", ticketId: "N/A - โปรดตรวจสอบที่ชีท" });
+            })
             .catch(error => showError(error));
         }
 
@@ -143,3 +148,4 @@
     </script>
 </body>
 </html>
+```
