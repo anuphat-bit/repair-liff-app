@@ -6,152 +6,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-    <style>
-        body { background-color: #f0f2f5; }
-        .container { max-width: 600px; }
-        .card { border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-        .section { display: none; } /* ซ่อนทุกส่วนไว้ก่อน */
-        .main-menu-button { height: 80px; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
-        .back-button { cursor: pointer; color: #0d6efd; text-decoration: none; }
-        .ticket-id { font-size: 1.6rem; font-weight: bold; color: #0d6efd; background-color: #e7f1ff; padding: 5px 15px; border-radius: 8px; }
-    </style>
+    <style>body{background-color:#f0f2f5}.container{max-width:600px}.card{border:none;box-shadow:0 4px 12px rgba(0,0,0,.08)}.section{display:none}.main-menu-button{height:80px;font-size:1.2rem;display:flex;align-items:center;justify-content:center}.back-button{cursor:pointer;color:#0d6efd;text-decoration:none}.ticket-id{font-size:1.6rem;font-weight:700;color:#0d6efd;background-color:#e7f1ff;padding:5px 15px;border-radius:8px}</style>
 </head>
 <body>
     <div class="container my-4">
-        <div id="main-menu" class="section card">
-            <div class="card-body p-4 text-center">
-                <h2 class="card-title mb-4">ระบบแจ้งซ่อมออนไลน์</h2>
-                <div class="d-grid gap-3">
-                    <button id="go-to-form-btn" class="btn btn-primary main-menu-button">📝<span class="ms-2">แจ้งเรื่องซ่อมใหม่</span></button>
-                    <button id="go-to-status-btn" class="btn btn-outline-secondary main-menu-button">🔎<span class="ms-2">ตรวจสอบสถานะ</span></button>
-                </div>
-            </div>
-        </div>
-
+        <div id="main-menu" class="section card"><div class="card-body p-4 text-center"><h2 class="card-title mb-4">ระบบแจ้งซ่อมออนไลน์</h2><div class="d-grid gap-3"><button id="go-to-form-btn" class="btn btn-primary main-menu-button">📝<span class="ms-2">แจ้งเรื่องซ่อมใหม่</span></button><button id="go-to-status-btn" class="btn btn-outline-secondary main-menu-button">🔎<span class="ms-2">ตรวจสอบสถานะ</span></button></div></div></div>
         <div id="repair-form-section" class="section"></div>
-
         <div id="status-check-section" class="section"></div>
     </div>
-
     <div class="modal fade" id="successModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-body p-4 text-center"><img src="https://i.imgur.com/4z2Z8tG.png" width="80"><h3 class="mt-3">รับเรื่องเรียบร้อยแล้ว!</h3><p>รหัสใบแจ้งซ่อมของคุณคือ:</p><p id="ticket-id-display" class="ticket-id">loading...</p><p class="text-muted small mt-3">กรุณาจดรหัสนี้ไว้เพื่อใช้ตรวจสอบสถานะ</p></div></div></div></div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // ===================================================================
         // --- การตั้งค่า (แก้ไข 2 จุดนี้เท่านั้น) ---
         // ===================================================================
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPzth6AiS1dSn5cxFPPMdJkyQmK-XaKxpr0OheKnAjPOgcDQDp7AqGCnPSl3k5hMFI/exec"; // วาง SCRIPT_URL ที่คัดลอกมาจากเฟสที่ 1
-        const LIFF_ID = "2008248434-1K7b3QPa"; // วาง LIFF ID ของแอปแจ้งซ่อมตัวหลักของคุณ
-
+        const SCRIPT_URL = "YOUR_APPS_SCRIPT_WEB_APP_URL";
+        const LIFF_ID = "YOUR_LIFF_ID";
         // ===================================================================
         // --- โค้ดหลักของแอป (ห้ามแก้ไข) ---
         // ===================================================================
-
-        const sections = {
-            menu: document.getElementById('main-menu'),
-            form: document.getElementById('repair-form-section'),
-            status: document.getElementById('status-check-section')
-        };
-
-        function showSection(sectionName) {
-            Object.values(sections).forEach(s => s.style.display = 'none');
-            sections[sectionName].style.display = 'block';
-        }
-
-        document.addEventListener("DOMContentLoaded", () => {
-            liff.init({ liffId: LIFF_ID })
-                .then(() => {
-                    loadSectionsHTML(); // สร้าง HTML ของแต่ละส่วน
-                    setupEventListeners(); // ตั้งค่าการทำงานของปุ่มต่างๆ
-                    showSection('menu'); // แสดงเมนูหลักเป็นหน้าแรก
-                })
-                .catch(err => {
-                    document.body.innerHTML = `<div class="alert alert-danger m-4">เกิดข้อผิดพลาดในการโหลด LIFF App: ${err.message}</div>`;
-                });
-        });
-
-        function setupEventListeners() {
-            // ปุ่มเมนูหลัก
-            document.getElementById('go-to-form-btn').addEventListener('click', () => {
-                liff.getProfile().then(profile => {
-                    document.getElementById('lineUserId').value = profile.userId;
-                    document.getElementById('requesterName').value = profile.displayName;
-                    showSection('form');
-                }).catch(() => showError('ไม่สามารถดึงข้อมูลโปรไฟล์ได้'));
-            });
-            document.getElementById('go-to-status-btn').addEventListener('click', () => showSection('status'));
-
-            // ปุ่มย้อนกลับ
-            document.querySelectorAll('.back-button').forEach(btn => btn.addEventListener('click', e => {
-                e.preventDefault();
-                showSection('menu');
-            }));
-
-            // ฟอร์ม
-            document.getElementById('repair-form').addEventListener('submit', handleFormSubmit);
-            document.getElementById('status-form').addEventListener('submit', handleStatusCheck);
-        }
-
-        // --- Logic การทำงานต่างๆ ---
-
-        function handleFormSubmit(e) { /* ... (โค้ดส่วนนี้ซ่อนไว้เพื่อความกระชับ) ... */ }
-        function handleStatusCheck(e) { /* ... (โค้ดส่วนนี้ซ่อนไว้เพื่อความกระชับ) ... */ }
-        function sendDataToBackend(data) { /* ... (โค้ดส่วนนี้ซ่อนไว้เพื่อความกระชับ) ... */ }
-        function showSuccess(ticketId) { /* ... (โค้ดส่วนนี้ซ่อนไว้เพื่อความกระชับ) ... */ }
-        function showError(errorMessage) { /* ... (โค้ดส่วนนี้ซ่อนไว้เพื่อความกระชับ) ... */ }
-        function displayStatusResult(data) { /* ... (โค้ดส่วนนี้ซ่อนไว้เพื่อความกระชับ) ... */ }
-        function showStatusError(message) { /* ... (โค้ดส่วนนี้ซ่อนไว้เพื่อความกระชับ) ... */ }
-
-        // --- ส่วนสร้าง HTML (เพื่อความสะอาดของโค้ด) ---
-
-        function loadSectionsHTML() {
-            sections.form.innerHTML = `
-                <div class="card"><div class="card-body p-4 p-md-5">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                       <h2 class="card-title mb-0">ใบแจ้งซ่อม</h2>
-                       <a href="#" class="back-button"> &laquo; กลับเมนูหลัก</a>
-                    </div>
-                    <form id="repair-form">
-                        <input type="hidden" id="lineUserId" name="lineUserId">
-                        <div class="mb-3"><label for="requesterName" class="form-label">ชื่อผู้แจ้ง</label><input type="text" class="form-control" id="requesterName" name="requesterName" readonly style="background-color: #e9ecef;"></div>
-                        <div class="row"><div class="col-md-6 mb-3"><label for="department" class="form-label">แผนก/ฝ่าย</label><input type="text" class="form-control" id="department" name="department" required></div><div class="col-md-6 mb-3"><label for="phoneNumber" class="form-label">เบอร์โทรศัพท์</label><input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" required></div></div>
-                        <div class="mb-3"><label for="location" class="form-label">ตำแหน่ง</label><textarea class="form-control" id="location" name="location" rows="2" required></textarea></div>
-                        <div class="mb-3"><label for="problemType" class="form-label">ประเภทปัญหา</label><select class="form-select" id="problemType" name="problemType" required><option value="" disabled selected>-- โปรดเลือก --</option><option value="ระบบไฟฟ้า">ระบบไฟฟ้า</option><option value="ระบบประปา">ระบบประปา</option><option value="คอมพิวเตอร์/IT">คอมพิวเตอร์/IT</option><option value="อาคารสถานที่">อาคารสถานที่</option><option value="อื่นๆ">อื่นๆ</option></select></div>
-                        <div class="mb-3"><label for="description" class="form-label">รายละเอียดปัญหา</label><textarea class="form-control" id="description" name="description" rows="3" required></textarea></div>
-                        <div class="mb-3"><label for="problemImage" class="form-label">แนบรูปภาพ (ถ้ามี)</label><input type="file" class="form-control" id="problemImage" name="problemImage" accept="image/*"></div>
-                        <div class="d-grid mt-4"><button type="submit" id="submit-button" class="btn btn-primary btn-lg">ส่งเรื่อง</button></div>
-                    </form>
-                </div></div>`;
-
-            sections.status.innerHTML = `
-                <div class="card"><div class="card-body p-4 p-md-5">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                       <h2 class="card-title mb-0">ตรวจสอบสถานะ</h2>
-                       <a href="#" class="back-button">&laquo; กลับเมนูหลัก</a>
-                    </div>
-                    <form id="status-form">
-                        <div class="mb-3"><label for="ticketId" class="form-label">กรอกรหัสใบแจ้งซ่อม</label><input type="text" class="form-control form-control-lg" id="ticketId" placeholder="เช่น 2410-0001" required></div>
-                        <div class="d-grid"><button type="submit" id="search-button" class="btn btn-success btn-lg">ค้นหา</button></div>
-                    </form>
-                </div></div>
-                <div id="status-loading" class="text-center mt-4" style="display: none;"><div class="spinner-border"></div><p class="mt-2">กำลังค้นหา...</p></div>
-                <div class="card mt-4" id="result-card" style="display:none;"><div class="card-header">ผลการค้นหา</div><div class="card-body">
-                    <p><strong>รหัส:</strong> <span id="res-ticketId"></span></p>
-                    <p><strong>สถานะปัจจุบัน:</strong> <span id="res-currentStatus" class="badge"></span></p><hr>
-                    <p><strong>ผู้แจ้ง:</strong> <span id="res-requesterName"></span></p>
-                    <p><strong>ประเภทปัญหา:</strong> <span id="res-problemType"></span></p>
-                    <p><strong>วันที่แจ้ง:</strong> <span id="res-timestamp"></span></p>
-                </div></div>
-                <div id="status-error-message" class="alert alert-danger mt-4" style="display:none;"></div>`;
-        }
-        // (The hidden code for brevity)
-        function handleFormSubmit(e) { e.preventDefault(); const t = document.getElementById("submit-button"); t.disabled = !0, t.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> กำลังส่ง...'; const n = Object.fromEntries(new FormData(e.target).entries()), o = document.getElementById("problemImage").files[0]; if (o) { const a = new FileReader; a.onload = e => { n.fileData = { fileName: o.name, mimeType: o.type, base64: e.target.result.split(",")[1] }, sendDataToBackend(n) }, a.readAsDataURL(o) } else sendDataToBackend(n) }
-        function sendDataToBackend(e) { fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "submitForm", data: e }), headers: { "Content-Type": "text/plain;charset=utf-8" } }).then(e => { if (!e.ok) throw new Error("Network response was not ok"); return e.json() }).then(e => { "success" === e.status ? showSuccess(e.ticketId) : showError(e.message || "เกิดข้อผิดพลาดในการส่งข้อมูล") }).catch(e => { console.error("Fetch Error:", e), showError(e.message) }) }
-        function showSuccess(e) { const t = new bootstrap.Modal(document.getElementById("successModal")); document.getElementById("ticket-id-display").innerText = e, t.show(), setTimeout(() => { liff.isInClient() && liff.closeWindow() }, 8000) }
-        function showError(e) { alert("เกิดข้อผิดพลาด: " + e); const t = document.getElementById("submit-button"); t.disabled = !1, t.innerText = "ส่งเรื่อง" }
-        function handleStatusCheck(e) { e.preventDefault(); const t = document.getElementById("ticketId").value.trim(); if (!t) return; const n = document.getElementById("search-button"); document.getElementById("status-loading").style.display = "block", document.getElementById("result-card").style.display = "none", document.getElementById("status-error-message").style.display = "none", n.disabled = !0; const o = `${SCRIPT_URL}?action=getStatus&ticketId=${t}`; fetch(o).then(e => e.json()).then(e => { "found" === e.status ? displayStatusResult(e.data) : showStatusError(e.message) }).catch(e => showStatusError("เกิดข้อผิดพลาดในการเชื่อมต่อ")).finally(() => { document.getElementById("status-loading").style.display = "none", n.disabled = !1 }) }
-        function displayStatusResult(e) { document.getElementById("res-ticketId").innerText = e.ticketId, document.getElementById("res-requesterName").innerText = e.requesterName, document.getElementById("res-problemType").innerText = e.problemType, document.getElementById("res-timestamp").innerText = (new Date(e.timestamp)).toLocaleString("th-TH"); const t = document.getElementById("res-currentStatus"); t.innerText = e.currentStatus, t.className = "badge", "แจ้งเรื่องแล้ว" === e.currentStatus ? t.classList.add("bg-secondary") : "กำลังดำเนินการ" === e.currentStatus ? t.classList.add("bg-warning", "text-dark") : "ดำเนินการเรียบร้อย" === e.currentStatus ? t.classList.add("bg-success") : t.classList.add("bg-info", "text-dark"), document.getElementById("result-card").style.display = "block", document.getElementById("status-error-message").style.display = "none" }
-        function showStatusError(e) { document.getElementById("status-error-message").innerText = e, document.getElementById("status-error-message").style.display = "block", document.getElementById("result-card").style.display = "none" }
+        const sections={menu:document.getElementById("main-menu"),form:document.getElementById("repair-form-section"),status:document.getElementById("status-check-section")};function showSection(e){Object.values(sections).forEach(t=>t.style.display="none"),sections[e].style.display="block"}document.addEventListener("DOMContentLoaded",()=>{liff.init({liffId:LIFF_ID}).then(()=>{loadSectionsHTML(),setupEventListeners(),showSection("menu")}).catch(e=>{document.body.innerHTML=`<div class="alert alert-danger m-4">เกิดข้อผิดพลาดในการโหลด LIFF App: ${e.message}</div>`})});function setupEventListeners(){document.getElementById("go-to-form-btn").addEventListener("click",()=>{liff.getProfile().then(e=>{document.getElementById("lineUserId").value=e.userId,document.getElementById("requesterName").value=e.displayName,showSection("form")}).catch(()=>showError("ไม่สามารถดึงข้อมูลโปรไฟล์ได้"))}),document.getElementById("go-to-status-btn").addEventListener("click",()=>showSection("status")),document.querySelectorAll(".back-button").forEach(e=>e.addEventListener("click",e=>{e.preventDefault(),showSection("menu")})),document.getElementById("repair-form").addEventListener("submit",handleFormSubmit),document.getElementById("status-form").addEventListener("submit",handleStatusCheck)}function handleFormSubmit(e){e.preventDefault();const t=document.getElementById("submit-button");t.disabled=!0,t.innerHTML='<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> กำลังส่ง...';const n=Object.fromEntries(new FormData(e.target).entries()),o=document.getElementById("problemImage").files[0];if(o){const a=new FileReader;a.onload=e=>{n.fileData={fileName:o.name,mimeType:o.type,base64:e.target.result.split(",")[1]},sendDataToBackend(n)},a.readAsDataURL(o)}else sendDataToBackend(n)}function sendDataToBackend(e){fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({action:"submitForm",data:e}),headers:{"Content-Type":"text/plain;charset=utf-8"}}).then(e=>{if(!e.ok)throw new Error("Network response was not ok");return e.json()}).then(e=>{"success"===e.status?showSuccess(e.ticketId):showError(e.message||"เกิดข้อผิดพลาดในการส่งข้อมูล")}).catch(e=>{console.error("Fetch Error:",e),showError(e.message)})}function showSuccess(e){const t=new bootstrap.Modal(document.getElementById("successModal"));document.getElementById("ticket-id-display").innerText=e,t.show(),setTimeout(()=>{liff.isInClient()&&liff.closeWindow()},8e3)}function showError(e){alert("เกิดข้อผิดพลาด: "+e);const t=document.getElementById("submit-button");t.disabled=!1,t.innerText="ส่งเรื่อง"}function handleStatusCheck(e){e.preventDefault();const t=document.getElementById("ticketId").value.trim();if(!t)return;const n=document.getElementById("search-button");document.getElementById("status-loading").style.display="block",document.getElementById("result-card").style.display="none",document.getElementById("status-error-message").style.display="none",n.disabled=!0;const o=`${SCRIPT_URL}?action=getStatus&ticketId=${t}`;fetch(o).then(e=>e.json()).then(e=>{"found"===e.status?displayStatusResult(e.data):showStatusError(e.message)}).catch(e=>showStatusError("เกิดข้อผิดพลาดในการเชื่อมต่อ")).finally(()=>{document.getElementById("status-loading").style.display="none",n.disabled=!1})}function displayStatusResult(e){document.getElementById("res-ticketId").innerText=e.ticketId,document.getElementById("res-requesterName").innerText=e.requesterName,document.getElementById("res-problemType").innerText=e.problemType,document.getElementById("res-timestamp").innerText=new Date(e.timestamp).toLocaleString("th-TH");const t=document.getElementById("res-currentStatus");t.innerText=e.currentStatus,t.className="badge","แจ้งเรื่องแล้ว"===e.currentStatus?t.classList.add("bg-secondary"):"กำลังดำเนินการ"===e.currentStatus?t.classList.add("bg-warning","text-dark"):"ดำเนินการเรียบร้อย"===e.currentStatus?t.classList.add("bg-success"):t.classList.add("bg-info","text-dark"),document.getElementById("result-card").style.display="block",document.getElementById("status-error-message").style.display="none"}function showStatusError(e){document.getElementById("status-error-message").innerText=e,document.getElementById("status-error-message").style.display="block",document.getElementById("result-card").style.display="none"}function loadSectionsHTML(){sections.form.innerHTML=`<div class="card"><div class="card-body p-4 p-md-5"><div class="d-flex justify-content-between align-items-center mb-4"><h2 class="card-title mb-0">ใบแจ้งซ่อม</h2><a href="#" class="back-button"> &laquo; กลับเมนูหลัก</a></div><form id="repair-form"><input type="hidden" id="lineUserId" name="lineUserId"><div class="mb-3"><label for="requesterName" class="form-label">ชื่อผู้แจ้ง</label><input type="text" class="form-control" id="requesterName" name="requesterName" readonly style="background-color:#e9ecef"></div><div class="row"><div class="col-md-6 mb-3"><label for="department" class="form-label">แผนก/ฝ่าย</label><input type="text" class="form-control" id="department" name="department" required></div><div class="col-md-6 mb-3"><label for="phoneNumber" class="form-label">เบอร์โทรศัพท์</label><input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" required></div></div><div class="mb-3"><label for="location" class="form-label">ตำแหน่ง</label><textarea class="form-control" id="location" name="location" rows="2" required></textarea></div><div class="mb-3"><label for="problemType" class="form-label">ประเภทปัญหา</label><select class="form-select" id="problemType" name="problemType" required><option value="" disabled selected>-- โปรดเลือก --</option><option value="ระบบไฟฟ้า">ระบบไฟฟ้า</option><option value="ระบบประปา">ระบบประปา</option><option value="คอมพิวเตอร์/IT">คอมพิวเตอร์/IT</option><option value="อาคารสถานที่">อาคารสถานที่</option><option value="อื่นๆ">อื่นๆ</option></select></div><div class="mb-3"><label for="description" class="form-label">รายละเอียดปัญหา</label><textarea class="form-control" id="description" name="description" rows="3" required></textarea></div><div class="mb-3"><label for="urgency" class="form-label">ระดับความเร่งด่วน</label><select class="form-select" id="urgency" name="urgency" required><option value="ทั่วไป">ทั่วไป</option><option value="ด่วน">ด่วน</option><option value="ด่วนที่สุด">ด่วนที่สุด</option></select></div><div class="mb-3"><label for="problemImage" class="form-label">แนบรูปภาพ (ถ้ามี)</label><input type="file" class="form-control" id="problemImage" name="problemImage" accept="image/*"></div><div class="d-grid mt-4"><button type="submit" id="submit-button" class="btn btn-primary btn-lg">ส่งเรื่อง</button></div></form></div></div>`,sections.status.innerHTML=`<div class="card"><div class="card-body p-4 p-md-5"><div class="d-flex justify-content-between align-items-center mb-4"><h2 class="card-title mb-0">ตรวจสอบสถานะ</h2><a href="#" class="back-button">&laquo; กลับเมนูหลัก</a></div><form id="status-form"><div class="mb-3"><label for="ticketId" class="form-label">กรอกรหัสใบแจ้งซ่อม</label><input type="text" class="form-control form-control-lg" id="ticketId" placeholder="เช่น 2510-0001" required></div><div class="d-grid"><button type="submit" id="search-button" class="btn btn-success btn-lg">ค้นหา</button></div></form></div></div><div id="status-loading" class="text-center mt-4" style="display:none"><div class="spinner-border"></div><p class="mt-2">กำลังค้นหา...</p></div><div class="card mt-4" id="result-card" style="display:none"><div class="card-header">ผลการค้นหา</div><div class="card-body"><p><strong>รหัส:</strong> <span id="res-ticketId"></span></p><p><strong>สถานะปัจจุบัน:</strong> <span id="res-currentStatus" class="badge"></span></p><hr><p><strong>ผู้แจ้ง:</strong> <span id="res-requesterName"></span></p><p><strong>ประเภทปัญหา:</strong> <span id="res-problemType"></span></p><p><strong>วันที่แจ้ง:</strong> <span id="res-timestamp"></span></p></div></div><div id="status-error-message" class="alert alert-danger mt-4" style="display:none"></div>`}
     </script>
 </body>
 </html>
