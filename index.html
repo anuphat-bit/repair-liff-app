@@ -21,7 +21,7 @@
         // --- การตั้งค่า (แก้ไข 2 จุดนี้เท่านั้น) ---
         // ===================================================================
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPzth6AiS1dSn5cxFPPMdJkyQmK-XaKxpr0OheKnAjPOgcDQDp7AqGCnPSl3k5hMFI/exec"; // วาง SCRIPT_URL ที่คัดลอกมาจาก Apps Script
-        const LIFF_ID = "2008248434-1K7b3QPa"; // วาง LIFF ID ของแอปแจ้งซ่อมตัวหลักของคุณ
+        const LIFF_ID = "2008248434-1k7bSQPa"; // วาง LIFF ID ของแอปแจ้งซ่อมตัวหลักของคุณ
 
         // ===================================================================
         // --- โค้ดหลักของแอป (ห้ามแก้ไข) ---
@@ -39,9 +39,17 @@
                         <input type="hidden" id="lineUserId" name="lineUserId">
                         <div class="mb-3"><label for="requesterName" class="form-label">ชื่อผู้แจ้ง</label><input type="text" class="form-control" id="requesterName" name="requesterName" readonly style="background-color:#e9ecef"></div>
                         <div class="row"><div class="col-md-6 mb-3"><label for="department" class="form-label">แผนก/ฝ่าย</label><input type="text" class="form-control" id="department" name="department" required></div><div class="col-md-6 mb-3"><label for="phoneNumber" class="form-label">เบอร์โทรศัพท์</label><input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" required></div></div>
-
                         <div class="mb-3"><label for="location" class="form-label">ตำแหน่งที่ต้องการให้ซ่อม</label><textarea class="form-control" id="location" name="location" rows="2" required></textarea></div>
-                        <div class="mb-3"><label for="problemType" class="form-label">ประเภทปัญหา</label><select class="form-select" id="problemType" name="problemType" required><option value="" disabled selected>-- โปรดเลือก --</option><option value="ระบบไฟฟ้า">ระบบไฟฟ้า</option><option value="ระบบประปา">ระบบประปา</option><option value="คอมพิวเตอร์/IT">คอมพิวเตอร์/IT</option><option value="อาคารสถานที่">อาคารสถานที่</option><option value="อื่นๆ">อื่นๆ</option></select></div>
+
+                        <div class="mb-3"><label for="problemType" class="form-label">ประเภทปัญหา</label><select class="form-select" id="problemType" name="problemType" required>
+                            <option value="" disabled selected>-- โปรดเลือก --</option>
+                            <option value="ระบบไฟฟ้า">ระบบไฟฟ้า</option>
+                            <option value="ระบบประปา">ระบบประปา</option>
+                            <option value="โทรศัพท์/อินเทอร์เน็ต">โทรศัพท์/อินเทอร์เน็ต</option>
+                            <option value="คอมพิวเตอร์/IT">คอมพิวเตอร์/IT</option>
+                            <option value="อาคารสถานที่">อาคารสถานที่</option>
+                            <option value="อื่นๆ">อื่นๆ</option>
+                        </select></div>
                         <div class="mb-3"><label for="description" class="form-label">ลักษณะ/อาการที่ชำรุด</label><textarea class="form-control" id="description" name="description" rows="3" required></textarea></div>
                         <div class="mb-3"><label for="urgency" class="form-label">ระดับความเร่งด่วน</label><select class="form-select" id="urgency" name="urgency" required><option value="ทั่วไป">ทั่วไป</option><option value="ด่วน">ด่วน</option><option value="ด่วนที่สุด">ด่วนที่สุด</option></select></div>
                         <div class="mb-3"><label for="problemImage" class="form-label">แนบรูปภาพ (ถ้ามี)</label><input type="file" class="form-control" id="problemImage" name="problemImage" accept="image/*"></div>
